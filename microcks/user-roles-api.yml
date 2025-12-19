@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: User Roles API
+  version: 1.0.0
+  description: Minimal PoC for returning a role object for a given user.
+
+paths:
+  /users/{userId}/roles:
+    get:
+      summary: Get roles for a user
+      description: Returns a list of roles for the specified user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique identifier of the user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful retrieval of user roles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        '404':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Role:
+      type: object
+      required: [id, displayName, assigned, source, permissions]
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+        assigned:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            type: string
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string

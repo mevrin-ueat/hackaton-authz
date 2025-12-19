@@ -1,0 +1,25 @@
+name: hachaton-authz
+
+services:
+
+  dotnet-sample-api:
+    container_name: dotnet-sample-api
+    image: dotnet-sample-api:latest
+    build:
+      context: ../
+      dockerfile: dotnet/sample-api/aspnetcoreapp/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5116:8080"
+        
+        
+  microcks-mock:
+    container_name: microcks-role-provider-api
+    build:
+      context: ../
+      dockerfile: microcks/Dockerfile
+    environment:
+      DEFAULT_ARTIFACTS_REPOSITORY_URL: "file:///opt/artifacts"
+    ports:
+      - "8585:8080"      # UI + mock endpoints on http://localhost:8585
