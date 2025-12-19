@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://www.topaz.sh/schema/manifest.json
+---
+
+model:
+  version: 3
+
+types:
+  user:
+
+  identity:
+    relations:
+      identifier: user
+
+  system:
+    relations:
+      owner: user
+      editor: user
+      viewer: user
+
+    permissions:
+      can_delete: owner
+      can_write: editor | can_delete
+      can_read: viewer | can_write
+
+  brand:
+    relations:
+      parent: system
+      owner: user
+      editor: user
+      viewer: user
+
+    permissions:
+      can_delete: owner | parent->can_delete
+      can_write: editor | parent->can_write
+      can_read: viewer | can_write
+
+  location:
+    relations:
+      parent: brand
+      owner: user
+      editor: user
+      viewer: user
+
+    permissions:
+      can_delete: owner | parent->can_delete
+      can_write: editor | can_delete | parent->can_write
+      can_read: viewer | can_write
