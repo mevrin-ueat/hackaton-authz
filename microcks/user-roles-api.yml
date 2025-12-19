@@ -1,0 +1,347 @@
+
+openapi: 3.0.3
+info:
+  title: User Roles API
+  version: 1.0.0
+  description: |
+    Returns the list of roles assigned to a specific user.
+    Supports pagination, filtering and multi-tenant contexts.
+
+    Notes:
+    - Roles may come from multiple sources (e.g., directory, local RBAC).
+    - Use filters to narrow to assigned roles or a particular source.
+
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: https://sandbox.api.example.com/v1
+    description: Sandbox
+
+tags:
+  - name: Users
+    description: Endpoints related to user resources
+  - name: Roles
+    description: Endpoints related to role management and lookup
+
+paths:
+  /users/{userId}/roles:
+    get:
+      operationId: listUserRoles
+      summary: List roles for a user
+      description: |
+        Returns a paginated list of roles for the specified user.
+        To fetch only roles currently assigned to the user, set `assigned=true`.
+        If your deployment uses multiple role sources (e.g., `directory`, `local`, `external`), use `source` to filter.
+
+      tags:
+        - Users
+        - Roles
+
+      security:
+        - bearerAuth: []
+        - oauth2:
+            - roles.read
+
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique identifier of the user.
+          schema:
+            type: string
+            minLength: 1
+        - name: tenantId
+          in: query
+          required: false
+          description: Optional tenant identifier for multi-tenant contexts.
+          schema:
+            type: string
+        - name: assigned
+          in: query
+          required: false
+          description: |
+            If true, returns only roles currently assigned to the user.
+            If false or omitted, returns all roles visible to the user context.
+          schema:
+            type: boolean
+            default: true
+        - name: source
+          in: query
+          required: false
+          description: Filter roles by source (e.g., directory, local, external).
+          schema:
+            type: string
+            enum: [directory, local, external]
+        - name: page
+          in: query
+          required: false
+          description: Page number (1-based).
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+
+      responses:
+        '200':
+          description: Successful retrieval of user roles.
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolesPage'
+              examples:
+                minimal:
+                  summary: Minimal example
+                  value:
+                    page: 1
+                    pageSize: 2
+                    totalItems: 2
+                    totalPages: 1
+                    items:
+                      - id: "role_admin"
+                        displayName: "Administrator"
+                        description: "Full administrative privileges"
+                        source: "local"
+                        assigned: true
+                        permissions:
+                          - "users:read"
+                          - "users:write"
+                          - "roles:manage"
+                      - id: "role_viewer"
+                        displayName: "Viewer"
+                        description: "Read-only access"
+                        source: "directory"
+                        assigned: false
+                        permissions:
+                          - "users:read"
+                withTenant:
+                  summary: Tenant-scoped example
+                  value:
+                    page: 1
+                    pageSize: 1
+                    totalItems: 1
+                    totalPages: 1
+                    items:
+                      - id: "role_billing_manager"
+                        displayName: "Billing Manager"
+                        description: "Manage invoices and billing profiles"
+                        source: "external"
+                        assigned: true
+                        tenantId: "tenant-12345"
+                        permissions:
+                          - "billing:read"
+                          - "billing:write"
+
+        '400':
+          description: Bad request (e.g., invalid query parameter or pagination out of range).
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidPage:
+                  value:
+                    error:
+                      code: "BAD_REQUEST"
+                      message: "Parameter 'page' must be >= 1."
+                      details:
+                        field: "page"
+                        value: 0
+
+        '401':
+          description: Unauthorized (missing or invalid credentials).
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '403':
+          description: Forbidden (insufficient permissions or scope).
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: User not found.
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                userNotFound:
+                  value:
+                    error:
+                      code: "NOT_FOUND"
+                      message: "User 'abc123' not found."
+
+        '429':
+          description: Too many requests (rate limited).
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Internal server error.
+          headers:
+            X-Request-Id:
+              description: Correlation ID for tracing requests.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+      # Vendor extensions to align with mirocks-style metadata conventions
+      x-mirocks-api:
+        domain: "iam"
+        entity: "role"
+        operationKind: "read"
+        piiSafe: true
+        rateLimitTier: "standard"
+        idempotent: true
+        auditEvent:
+          type: "USER_ROLES_LISTED"
+          severity: "low"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/oauth2/authorize
+          tokenUrl: https://auth.example.com/oauth2/token
+          scopes:
+            roles.read: Read user roles
+            roles.write: Manage roles (not required for this endpoint)
+
+  schemas:
+    Role:
+      type: object
+      required: [id, displayName, assigned, source, permissions]
+      properties:
+        id:
+          type: string
+          description: Stable role identifier.
+        displayName:
+          type: string
+          description: Human-friendly role name.
+        description:
+          type: string
+          nullable: true
+        source:
+          type: string
+          description: Origin of the role definition.
+          enum: [directory, local, external]
+        assigned:
+          type: boolean
+          description: Whether the user currently holds this role.
+        permissions:
+          type: array
+          description: Permission keys granted by this role.
+          items:
+            type: string
+        tenantId:
+          type: string
+          nullable: true
+          description: Tenant to which the role is scoped (if applicable).
+
+    RolesPage:
+      type: object
+      required: [items, page, pageSize, totalItems, totalPages]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        totalItems:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code.
+              enum:
+                - BAD_REQUEST
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - TOO_MANY_REQUESTS
+                - INTERNAL_ERROR
+            message:
+              type: string
+              description: Human-friendly error message.
+            details:
+              type: object
+              nullable: true
+              additionalProperties: true
