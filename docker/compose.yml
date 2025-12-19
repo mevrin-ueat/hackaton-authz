@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  openfga:
+  hackaton:
 
 volumes:
   openfga:
@@ -16,7 +16,7 @@ services:
       - OPENFGA_DATASTORE_ENGINE=sqlite
       - OPENFGA_DATASTORE_URI=file:/home/nonroot/openfga.db
     networks:
-      - openfga
+      - hackaton
     volumes:
       - openfga:/home/nonroot
 
@@ -34,7 +34,7 @@ services:
       - OPENFGA_HTTP_CORS_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*,https://play.fga.dev
     command:  run
     networks:
-      - openfga
+      - hackaton
     volumes:
       - openfga:/home/nonroot
     ports:
@@ -44,3 +44,16 @@ services:
       - "8081:8081"
       # Needed for the playground (Do not enable in prod!)
       - "3000:3000"
+
+  dotnet-sample-api:
+    container_name: dotnet-sample-api
+    image: dotnet-sample-api:latest
+    build:
+      context: ..
+      dockerfile: dotnet/sample-api/aspnetcoreapp/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5116:8080"
+    networks:
+      - hackaton
