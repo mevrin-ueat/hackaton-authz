@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 networks:
   hackaton:
@@ -32,7 +32,7 @@ services:
       - OPENFGA_DATASTORE_URI=file:/home/nonroot/openfga.db
       - OPENFGA_LOG_FORMAT=json
       - OPENFGA_HTTP_CORS_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*,https://play.fga.dev
-    command:  run
+    command: run
     networks:
       - hackaton
     volumes:
@@ -53,6 +53,8 @@ services:
       dockerfile: dotnet/sample-api/aspnetcoreapp/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - FGA_API_URL=http://openfga:8080
+      - FGA_STORE_ID=default
     ports:
       - "5116:8080"
     networks:

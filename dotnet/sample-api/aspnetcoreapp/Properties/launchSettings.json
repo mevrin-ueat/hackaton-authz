@@ -7,7 +7,9 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5116",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "FGA_API_URL": "http://localhost:8080",
+        "FGA_STORE_ID": "default"
       }
     },
     "https": {
@@ -16,7 +18,9 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7074;http://localhost:5028",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "FGA_API_URL": "http://localhost:8080",
+        "FGA_STORE_ID": "default"
       }
     }
   }

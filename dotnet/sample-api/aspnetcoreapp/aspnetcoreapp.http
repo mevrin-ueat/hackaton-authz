@@ -8,3 +8,8 @@ Content-Type: application/json
 GET {{HostAddress}}/
 Content-Type: application/json
 Authorization: Bearer sample_token_12345
+
+### Create Resource (POST request with auth header)
+POST {{HostAddress}}/create
+Content-Type: application/json
+Authorization: Bearer sample_token_12345

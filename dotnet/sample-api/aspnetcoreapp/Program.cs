@@ -30,4 +30,6 @@ app.Use((async (context, func) =>
 
 app.MapGet("/", () => "Hello World!");
 
+app.MapPost("/create", () => "Create!");
+
 app.Run();
