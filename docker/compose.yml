@@ -1,0 +1,86 @@
+version: '3.8'
+
+networks:
+  hackaton:
+
+volumes:
+  openfga:
+
+services:
+  migrate:
+    image: openfga/openfga:latest
+    container_name: migrate
+    command: migrate
+    user: nonroot
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=sqlite
+      - OPENFGA_DATASTORE_URI=file:/home/nonroot/openfga.db
+    networks:
+      - hackaton
+    volumes:
+      - openfga:/home/nonroot
+
+  openfga:
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    image: openfga/openfga:latest
+    container_name: openfga
+    user: root
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=sqlite
+      - OPENFGA_DATASTORE_URI=file:/home/nonroot/openfga.db
+      - OPENFGA_LOG_FORMAT=json
+      - OPENFGA_HTTP_CORS_ALLOWED_ORIGINS=http://localhost:*,http://127.0.0.1:*,https://play.fga.dev
+    command:  run
+    networks:
+      - hackaton
+    volumes:
+      - openfga:/home/nonroot
+    ports:
+      # Needed for the http server
+      - "8080:8080"
+      # Needed for the grpc server (if used)
+      - "8081:8081"
+      # Needed for the playground (Do not enable in prod!)
+      - "3000:3000"
+
+  dotnet-sample-api:
+    container_name: dotnet-sample-api
+    image: dotnet-sample-api:latest
+    build:
+      context: ..
+      dockerfile: dotnet/sample-api/aspnetcoreapp/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5116:8080"
+    networks:
+      - hackaton
+  
+  topaz:
+    command:
+      - run
+      - --config-file
+      - /config/local.yaml
+    container_name: topaz
+    environment:
+      - TOPAZ_POLICIES_DIR=/policies
+      - TOPAZ_CERTS_DIR=/certs
+      - TOPAZ_DB_DIR=/db
+    image: ghcr.io/aserto-dev/topaz:latest
+    ports:
+      - 9090:8080 # console http
+      - 8081:8081 # console grpc
+      - 8282:8282 # authorizer grpc
+      - 8383:8383 # authorizer http
+      - 9292:9292 # directory grpc
+      - 9393:9393 # directory http
+      - 9494:9494 # healthcheck
+      - 9696:9696 # metrics
+    volumes:
+      - ./topaz/config:/config
+      - ./topaz/policies:/policies
+      - ./topaz/certs:/certs
+      - ./topaz/db:/db
+      - ./topaz/data:/data

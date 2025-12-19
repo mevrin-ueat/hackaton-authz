@@ -1,5 +1,10 @@
 @HostAddress = http://localhost:5116
 
-### Order Create
+### Unauthorized Request (no auth header)
 GET {{HostAddress}}/
 Content-Type: application/json
+
+### Authorized Request (with auth header)
+GET {{HostAddress}}/
+Content-Type: application/json
+Authorization: Bearer sample_token_12345
