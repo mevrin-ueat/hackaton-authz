@@ -1,0 +1,14 @@
+name: hachaton-authz
+
+services:
+
+  dotnet-sample-api:
+    container_name: dotnet-sample-api
+    image: dotnet-sample-api:latest
+    build:
+      context: ../
+      dockerfile: dotnet/sample-api/aspnetcoreapp/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5116:8080"
