@@ -1,0 +1,358 @@
+{
+  "schema_version": "1.1",
+  "type_definitions": [
+    {
+      "type": "user",
+      "relations": {},
+      "metadata": null
+    },
+    {
+      "type": "group",
+      "relations": {
+        "member": {
+          "this": {}
+        }
+      },
+      "metadata": {
+        "relations": {
+          "member": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "system",
+      "relations": {
+        "admin": {
+          "this": {}
+        }
+      },
+      "metadata": {
+        "relations": {
+          "admin": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "brand",
+      "relations": {
+        "parent": {
+          "this": {}
+        },
+        "admin": {
+          "union": {
+            "child": [
+              {
+                "this": {}
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "admin"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "manager": {
+          "this": {}
+        },
+        "employee": {
+          "this": {}
+        },
+        "can_read": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "admin"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "manager"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "employee"
+                }
+              }
+            ]
+          }
+        },
+        "can_write": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "admin"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "manager"
+                }
+              }
+            ]
+          }
+        },
+        "can_manage": {
+          "computedUserset": {
+            "relation": "admin"
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "parent": {
+            "directly_related_user_types": [
+              {
+                "type": "system"
+              }
+            ]
+          },
+          "admin": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "manager": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "employee": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "can_read": {
+            "directly_related_user_types": []
+          },
+          "can_write": {
+            "directly_related_user_types": []
+          },
+          "can_manage": {
+            "directly_related_user_types": []
+          }
+        }
+      }
+    },
+    {
+      "type": "location",
+      "relations": {
+        "parent": {
+          "this": {}
+        },
+        "admin": {
+          "union": {
+            "child": [
+              {
+                "this": {}
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "admin"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "manager": {
+          "union": {
+            "child": [
+              {
+                "this": {}
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "manager"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "employee": {
+          "union": {
+            "child": [
+              {
+                "this": {}
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "employee"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "can_read": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "admin"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "manager"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "employee"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "can_read"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "can_write": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "admin"
+                }
+              },
+              {
+                "computedUserset": {
+                  "relation": "manager"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "can_write"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "can_manage": {
+          "union": {
+            "child": [
+              {
+                "computedUserset": {
+                  "relation": "admin"
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "can_manage"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              },
+              {
+                "tupleToUserset": {
+                  "computedUserset": {
+                    "relation": "manager"
+                  },
+                  "tupleset": {
+                    "relation": "parent"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "metadata": {
+        "relations": {
+          "parent": {
+            "directly_related_user_types": [
+              {
+                "type": "brand"
+              }
+            ]
+          },
+          "admin": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "manager": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "employee": {
+            "directly_related_user_types": [
+              {
+                "type": "user"
+              }
+            ]
+          },
+          "can_read": {
+            "directly_related_user_types": []
+          },
+          "can_write": {
+            "directly_related_user_types": []
+          },
+          "can_manage": {
+            "directly_related_user_types": []
+          }
+        }
+      }
+    }
+  ]
+}

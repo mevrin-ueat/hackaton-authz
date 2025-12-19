@@ -1,0 +1,32 @@
+model
+  schema 1.1
+
+type user
+
+type group
+  relations
+    define member: [user]
+
+type system
+  relations
+    define admin: [user]
+
+type brand
+  relations
+    define parent: [system]
+    define admin: [user] or admin from parent
+    define manager: [user]
+    define employee: [user]
+    define can_read: admin or manager or employee
+    define can_write: admin or manager
+    define can_manage: admin
+
+type location
+  relations
+    define parent: [brand]
+    define admin: [user] or admin from parent
+    define manager: [user] or manager from parent
+    define employee: [user] or employee from parent
+    define can_read: admin or manager or employee or can_read from parent
+    define can_write: admin or manager or can_write from parent
+    define can_manage: admin or can_manage from parent or manager from parent
